@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\hybrid.hpp">
+    <ClInclude Include="include\hybrid\hybrid.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

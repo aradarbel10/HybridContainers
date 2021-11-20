@@ -1,4 +1,4 @@
-#include "../include/hybrid.hpp"
+#include "hybrid/hybrid.hpp"
 #include <iostream>
 #include <vector>
 
