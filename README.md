@@ -2,9 +2,9 @@
 Create mutable C++ containers at compile-time, then use them during run-time!
 
 ## Motivation
-The C++ is getting more and more of its features `constexpr`ed as time goes on. Sadly, one huge thing is missing from it -- constexpr containers.
+C++ is getting more and more of its features `constexpr`ed as time goes on. Sadly, one huge thing is missing from it -- constexpr containers.
 
-With the introduction of C++20, `std::vector` and `std::string` are now usable in "constexpr-context" thanks to transient allocations (caveant: [language support](##Language-Support)). This means your vectors and strings can allocate memory inside constexpr functions, but that memory ***cannot*** leak, and must be deallocated by the end of the function. Moreover, containers like `std::set` and `std::map` are currently not usable at all in constexpr-context. Hybrid comes to solve these problems.
+With the introduction of C++20, `std::vector` and `std::string` are now usable in "constexpr-context" thanks to transient allocations (caveant: [language support](#language-support)). This means your vectors and strings can allocate memory inside constexpr functions, but that memory ***cannot*** leak, and must be deallocated by the end of the function. Moreover, containers like `std::set` and `std::map` are currently not usable at all in constexpr-context. Hybrid comes to solve these problems.
 
 ## How To Use
 Using Hybrid is very simple, the hope is that you'll barely need to modify your existing code.
@@ -49,6 +49,8 @@ And the output is as expected,
 ```
 Awesome!
 
+Hybrid currently offers `hybrid::array<T>`, `hybrid::set<T>`, `hybrid::map<K, V>`, which can all be used with a similar interface to their standard library counterparts (though some functionality is still missing).
+
 
 ## Under The Hood
 Hybrid gets around the language's limitation using one simple macro:
@@ -64,7 +66,7 @@ Without knowing the size of the result in advance, we can't know the size of the
 ## Installation
 Hybrid is a header-only library. To use, copy the `include/` folder into your project directory, and you're ready to go!
 
-The repo also includes a VS solution that runs an example program `main.cpp`. I intentionally chose the MSVC compiler for this (see [language support](##Language-Support)).
+The repo also includes a VS solution that runs an example program `main.cpp`. I intentionally chose the MSVC compiler for this (see [language support](#language-support)).
 
 ## Language Support
 As of right now, Hybrid relies completely on `std::vector` as the underlying container for everything else. In C++20 ([P1004R2](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1004r2.pdf)) `std::vector` got its constexpr constructors, destructor, and everything else it needs to be used in constexpr context.
