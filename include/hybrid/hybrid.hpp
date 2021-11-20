@@ -10,6 +10,21 @@
 
 namespace hybrid {
 
+	// comparison between arbitrary containers
+	template <typename T, size_t N1, size_t N2, template<typename, size_t> class C>
+	constexpr bool operator==(const C<T, N1>& lhs, const C<T, N2>& rhs) {
+		if (lhs.size() != rhs.size())
+			return false;
+
+		auto it1 = lhs.begin();
+		auto it2 = rhs.begin();
+		for (; it1 != lhs.end(); it1++, it2++) {
+			if (*it1 != *it2)
+				return false;
+		}
+		return true;
+	}
+
     // allow casting hybrid containers from compile-time types to run-time or vice versa
     template <size_t TargetSize = 0, size_t N, typename T, template <typename, size_t> class C>
     constexpr auto cast(const C<T, N>& container) {
