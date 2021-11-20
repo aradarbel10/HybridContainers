@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="include\hybrid\array.hpp" />
     <ClInclude Include="include\hybrid\hybrid.hpp" />
+    <ClInclude Include="include\hybrid\map.hpp" />
     <ClInclude Include="include\hybrid\set.hpp" />
   </ItemGroup>
   <ItemGroup>

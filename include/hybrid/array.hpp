@@ -50,4 +50,18 @@ namespace hybrid {
     constexpr auto lift(const std::vector<T>& container) {
         return hybrid::array<T>(container);
     }
+
+	template <typename T, size_t N1, size_t N2>
+	constexpr bool operator==(const hybrid::array<T, N1>& lhs, const hybrid::array<T, N2>& rhs) {
+		if (lhs.size() != rhs.size())
+			return false;
+
+		auto it1 = lhs.begin();
+		auto it2 = rhs.begin();
+		for (; it1 != lhs.end(); it1++, it2++) {
+			if (*it1 != *it2)
+				return false;
+		}
+		return true;
+	}
 } // namespace hybrid

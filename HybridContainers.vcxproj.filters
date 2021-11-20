@@ -29,6 +29,9 @@
     <ClInclude Include="include\hybrid\set.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hybrid\map.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />

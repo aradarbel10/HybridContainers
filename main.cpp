@@ -53,7 +53,7 @@ void test_set() {
 	static_assert(static_result == hybrid::set{1, 2, 5, 10, 25, 50});
 
 	hybrid::set<int> back_to_runtime = hybrid::cast(static_result);
-	back_to_runtime.insert(7);
+	back_to_runtime.insert(5);
 
 	for (auto iter = back_to_runtime.begin(); iter != back_to_runtime.end(); iter++) {
 		std::cout << (iter == back_to_runtime.begin() ? "" : ", ") << *iter;
@@ -61,10 +61,45 @@ void test_set() {
 	std::cout << "\n\n";
 }
 
+
+// lastly, you can also use `map`
+constexpr hybrid::map<std::string_view, int> zip_dict(const hybrid::array<std::string_view>& keys, const hybrid::array<int>& vals) {
+	if (keys.size() != vals.size())
+		throw std::invalid_argument{"sizes must match!"};
+
+	hybrid::map<std::string_view, int> result;
+
+	auto key_iter = keys.begin();
+	auto val_iter = vals.begin();
+	for (; key_iter != keys.end(); key_iter++, val_iter++) {
+		result.insert(*key_iter, *val_iter);
+	}
+
+	return result;
+}
+
+void test_map() {
+	auto dynamic_result = zip_dict({"one", "two", "three", "seven"}, {1, 2, 3, 7});
+
+	constexpr auto static_result = hybrid_compute(zip_dict, hybrid::array<std::string_view>{"one", "two", "three", "seven"}, hybrid::array<int>{1, 2, 3, 7});
+	static_assert(static_result == hybrid::map<std::string_view, int>{{"one", 1}, {"two", 2}, {"three", 3}, {"seven", 7}});
+
+	hybrid::map<std::string_view, int> back_to_runtime = hybrid::cast(static_result);
+	back_to_runtime.insert("six", 6);
+
+	for (auto iter = back_to_runtime.begin(); iter != back_to_runtime.end(); iter++) {
+		std::cout << (iter == back_to_runtime.begin() ? "[" : ", [") << iter->first << "; " << iter->second << "]";
+	}
+	std::cout << "\n\n";
+}
+
+
 int main() {
 
 	test_array();
 	test_set();
+	test_map();
+
 
 	return 0;
 }

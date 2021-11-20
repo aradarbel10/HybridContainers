@@ -4,12 +4,9 @@
 
 namespace hybrid {
 	namespace impl {
-		template <typename ValT, size_t N = 0>
-		requires std::totally_ordered<ValT>
+		template <typename ValT, class Ord = std::less<ValT>, size_t N = 0>
 		class impl_set : protected hybrid::array<ValT, N> {
 		private:
-			using iterator = hybrid::array<ValT, N>::iterator;
-
 			using hybrid::array<ValT, N>::at;
 
 			constexpr int binary_search(const ValT& val, int first, int last) const {
@@ -17,9 +14,9 @@ namespace hybrid {
 					return first;
 
 				auto mid = first + static_cast<int>((last - first) / 2);
-				if (val < at(mid)) {
+				if (Ord{}(val, at(mid))) {
 					return binary_search(val, first, mid);
-				} else if (val > at(mid)) {
+				} else if (Ord{}(at(mid), val)) {
 					return binary_search(val, mid + 1, last);
 				} else { // ==
 					return mid;
@@ -29,6 +26,8 @@ namespace hybrid {
 			constexpr int binary_search(const ValT& val) {
 				return binary_search(val, 0, size());
 			}
+
+			constexpr static bool vals_eq(const ValT& lhs, const ValT& rhs) { return !Ord{}(lhs, rhs) && !Ord{}(rhs, lhs); }
 
 		public:
 			constexpr impl_set() { }
@@ -43,14 +42,10 @@ namespace hybrid {
 			using hybrid::array<ValT, N>::empty;
 			using hybrid::array<ValT, N>::begin;
 			using hybrid::array<ValT, N>::end;
-			using hybrid::array<ValT, N>::cbegin;
-			using hybrid::array<ValT, N>::cend;
-			using hybrid::array<ValT, N>::rbegin;
-			using hybrid::array<ValT, N>::rend;
 
 			constexpr bool insert(const ValT& val) {
 				int index = binary_search(val);
-				if (index < size() && val == at(index)) {
+				if (index < size() && vals_eq(val, at(index))) {
 					return false;
 				}
 				hybrid::array<ValT, N>::insert(begin() + index, val);
@@ -59,12 +54,12 @@ namespace hybrid {
 
 			constexpr bool contains(const ValT& val) const {
 				int index = binary_search(val);
-				return at(index) == val;
+				return index < size() && vals_eq(val, at(index));
 			}
 
 			constexpr bool erase(const ValT& val) {
 				int index = binary_search(val);
-				if (index < size() && val == at(index)) {
+				if (index < size() && vals_eq(val, at(index))) {
 					std::vector<ValT>::erase(begin() + index);
 					return true;
 				}
@@ -73,13 +68,13 @@ namespace hybrid {
 
 			constexpr auto find(const ValT& val) {
 				int index = binary_search(val);
-				return ((index < size() && at(index) == val) ? begin() + index : end());
+				return ((index < size() && vals_eq(val, at(index))) ? begin() + index : end());
 			}
 		};
 	} // namespace impl
 
 	template <typename T, size_t N = 0>
-	class set : public impl::impl_set<T, N> {
+	class set : public impl::impl_set<T, std::less<T>, N> {
 	public:
 		constexpr set() = default;
 
@@ -114,5 +109,19 @@ namespace hybrid {
 	template <typename T, size_t N>
 	constexpr auto lift(const hybrid::set<T, N>& container) {
 		return container;
+	}
+
+	template <typename T, size_t N1, size_t N2>
+	constexpr bool operator==(const set<T, N1>& lhs, const set<T, N2>& rhs) {
+		if (lhs.size() != rhs.size())
+			return false;
+
+		auto it1 = lhs.begin();
+		auto it2 = rhs.begin();
+		for (; it1 != lhs.end(); it1++, it2++) {
+			if (std::less{}(*it1, *it2) || std::less{}(*it2, *it1))
+				return false;
+		}
+		return true;
 	}
 } // namespace hybrid

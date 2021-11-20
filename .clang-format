@@ -1,5 +1,5 @@
 Language: Cpp
-ColumnLimit: 100
+ColumnLimit: 160
 IndentWidth: 4
 PointerAlignment: Left
 AccessModifierOffset: -4
