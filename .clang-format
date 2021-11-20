@@ -5,6 +5,7 @@ PointerAlignment: Left
 AccessModifierOffset: -4
 BreakBeforeBraces: Attach
 AlwaysBreakTemplateDeclarations: true
-UseTab: Never
+TabWidth: 4
+UseTab: ForIndentation
 NamespaceIndentation: All
 Cpp11BracedListStyle: true
