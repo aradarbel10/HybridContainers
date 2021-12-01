@@ -12,36 +12,45 @@ namespace hybrid {
 		template <typename KeyT, typename ValT, size_t N = 0>
 		class impl_map : protected hybrid::impl::impl_set<std::pair<KeyT, ValT>, less_by_key<KeyT, ValT>, N> {
 		private:
-			using parent_type = hybrid::impl::impl_set<std::pair<KeyT, ValT>, less_by_key<KeyT, ValT>, N>;
+			using parent = hybrid::impl::impl_set<std::pair<KeyT, ValT>, less_by_key<KeyT, ValT>, N>;
 
 		protected:
 			constexpr impl_map() = default;
-			constexpr impl_map(std::initializer_list<std::pair<KeyT, ValT>> il) : parent_type(il) {}
+			constexpr impl_map(std::initializer_list<std::pair<KeyT, ValT>> il) : parent(il) {}
+
+			template <size_t S, template <typename, typename, size_t> class C>
+			constexpr impl_map(const C<KeyT, ValT, S>& other) {
+				auto i = other.begin();
+				while (i != other.end()) {
+					insert(i->first, i->second);
+					i++;
+				}
+			}
 
 		public:
-			using parent_type::begin;
-			using parent_type::empty;
-			using parent_type::end;
-			using parent_type::size;
+			using parent::begin;
+			using parent::empty;
+			using parent::end;
+			using parent::size;
 
-			constexpr bool insert(const KeyT& key, const ValT& val) { return parent_type::insert({key, val}); }
+			constexpr bool insert(const KeyT& key, const ValT& val) { return parent::insert({key, val}); }
 
 			constexpr bool contains(const KeyT& key) const {
 				std::pair<KeyT, ValT> pair;
 				pair.first = key;
-				return parent_type::contains(pair);
+				return parent::contains(pair);
 			}
 
 			constexpr bool erase(const KeyT& key) {
 				std::pair<KeyT, ValT> pair;
 				pair.first = key;
-				return parent_type::erase(pair);
+				return parent::erase(pair);
 			}
 
 			constexpr ValT& operator[](const KeyT& key) {
 				std::pair<KeyT, ValT> pair;
 				pair.first = key;
-				auto iter = parent_type::find(pair);
+				auto iter = parent::find(pair);
 
 				if (iter == end())
 					throw std::out_of_range{"key not found"};
@@ -57,32 +66,8 @@ namespace hybrid {
 		constexpr map() = default;
 
 		template <size_t S, template <typename, typename, size_t> class C>
-		constexpr map(const C<KeyT, ValT, S>& other) {
-			if (other.size() != N)
-				throw std::invalid_argument{"sizes must match!"};
-			std::copy(other.begin(), other.end(), this->begin());
-		}
-
-		constexpr map(std::initializer_list<std::pair<KeyT, ValT>> il) {
-			if (il.size() != N)
-				throw std::invalid_argument{"sizes must match!"};
-			std::copy(il.begin(), il.end(), this->begin());
-		}
-	};
-
-	template <typename KeyT, typename ValT>
-	class map<KeyT, ValT, 0> : public impl::impl_map<KeyT, ValT> {
-	public:
-		constexpr map() = default;
-
-		constexpr map(std::initializer_list<std::pair<KeyT, ValT>> il) : impl::impl_map<KeyT, ValT>(il) { }
-
-		template <size_t N>
-		constexpr map(const map<KeyT, ValT, N>& other) {
-			this->resize(N);
-			std::copy(other.begin(), other.end(), this->begin());
-		}
-
+		constexpr map(const C<KeyT, ValT, S>& other) : impl::impl_map<KeyT, ValT, N>(other) {}
+		constexpr map(std::initializer_list<std::pair<KeyT, ValT>> il) : impl::impl_map<KeyT, ValT, N>(il) {}
 	};
 
 	template <typename KeyT, typename ValT, size_t N>

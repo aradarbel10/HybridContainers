@@ -19,14 +19,14 @@ namespace hybrid {
 		constexpr array() = default;
 
 		template <size_t S, template <typename, size_t> class C>
-		constexpr array(const C<T, S>& other) {
+		constexpr array(const C<T, S>& other) : std::array<T, N>() {
 			if (other.size() > N)
 				throw std::invalid_argument{"statically allocated array can't hold more than its capacity!"};
 			std::copy(other.begin(), other.end(), this->begin());
 			m_size = other.size();
 		}
 
-		constexpr array(std::initializer_list<T> il) {
+		constexpr array(std::initializer_list<T> il) : std::array<T, N>() {
 			if (il.size() > N)
 				throw std::invalid_argument{"statically allocated array can't hold more than its capacity!"};
 			std::copy(il.begin(), il.end(), this->begin());
@@ -34,6 +34,12 @@ namespace hybrid {
 		}
 
 		constexpr T& operator[](size_t index) {
+			if (index >= m_size)
+				throw std::out_of_range{"cannot access element past size of array!"};
+			return parent::operator[](index);
+		}
+
+		constexpr const T& operator[](size_t index) const {
 			if (index >= m_size)
 				throw std::out_of_range{"cannot access element past size of array!"};
 			return parent::operator[](index);
@@ -53,6 +59,24 @@ namespace hybrid {
 
 		constexpr void clear() { m_size = 0; }
 		constexpr void push_back(const T& val) { operator[](m_size++) = val; }
+		constexpr void insert(int index, const T& val) {
+			if (index > m_size)
+				throw std::out_of_range{"cannot insert element past end of array!"};
+			else if (m_size >= N)
+				throw std::invalid_argument{"statically allocated array can't hold more than its capacity!"};
+
+			m_size++;
+			if (index + 1 < m_size) std::copy(begin() + index, end(), begin() + index + 1);
+			(*this)[index] = val;
+		}
+		constexpr void insert(parent::iterator iter, const T& val) {
+			insert(std::distance(begin(), iter), val);
+		}
+		constexpr void resize(size_t new_size) {
+			if (new_size > N)
+				throw std::invalid_argument{"can't resize statically allocated array to more than its capacity!"};
+			m_size = new_size;
+		}
 	};
 
 	template <typename T, size_t N>

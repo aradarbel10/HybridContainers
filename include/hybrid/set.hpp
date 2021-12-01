@@ -23,20 +23,29 @@ namespace hybrid {
 				}
 			}
 
-			constexpr int binary_search(const ValT& val) {
-				return binary_search(val, 0, size());
-			}
+			constexpr int binary_search(const ValT& val) { return binary_search(val, 0, size()); }
 
 			constexpr static bool vals_eq(const ValT& lhs, const ValT& rhs) { return !Ord{}(lhs, rhs) && !Ord{}(rhs, lhs); }
 
 		public:
-			constexpr impl_set() { }
+			constexpr impl_set() = default;
 
-			constexpr impl_set(std::initializer_list<ValT> il) {
-				for (auto i = il.begin(); i != il.end(); i++) {
+			constexpr impl_set(auto first, auto last) : hybrid::array<ValT, N>() {
+				for (auto i = first; i != last; i++) {
 					insert(*i);
 				}
 			}
+
+			template <size_t S, template <typename, size_t> class C>
+			constexpr impl_set(const C<ValT, S>& other) {
+				auto i = other.begin();
+				while (i != other.end()) {
+					insert(*i);
+					i++;
+				}
+			}
+
+			constexpr impl_set(std::initializer_list<ValT> il) : impl_set(il.begin(), il.end()) {}
 
 			using hybrid::array<ValT, N>::size;
 			using hybrid::array<ValT, N>::empty;
@@ -79,31 +88,10 @@ namespace hybrid {
 		constexpr set() = default;
 
 		template <size_t S, template <typename, size_t> class C>
-		constexpr set(const C<T, S>& other) {
-			if (other.size() != N)
-				throw std::invalid_argument{"sizes must match!"};
-			std::copy(other.begin(), other.end(), this->begin());
-		}
+		constexpr set(const C<T, S>& other) : impl::impl_set<T, std::less<T>, N>(other) {}
 
-		constexpr set(std::initializer_list<T> il) {
-			if (il.size() != N)
-				throw std::invalid_argument{"sizes must match!"};
-			std::copy(il.begin(), il.end(), this->begin());
-		}
-	};
+		constexpr set(std::initializer_list<T> il) : impl::impl_set<T, std::less<T>, N>(il) {}
 
-	template <typename T>
-	class set<T, 0> : public impl::impl_set<T> {
-	public:
-		constexpr set() = default;
-
-		constexpr set(std::initializer_list<T> il) : impl::impl_set<T>(il) {}
-
-		template <size_t N>
-		constexpr set(const set<T, N>& other) {
-			this->resize(N);
-			std::copy(other.begin(), other.end(), this->begin());
-		}
 	};
 
 	template <typename T, size_t N>
