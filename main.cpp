@@ -48,7 +48,7 @@ constexpr hybrid::set<int> factors(int num) {
 void test_set() {
 	// let's look at a demonstration similar to before, just to see that everything works
 	auto dynamic_result = factors(50);
-
+	
 	constexpr auto static_result = hybrid_compute(factors, 50);
 	static_assert(static_result == hybrid::set{1, 2, 5, 10, 25, 50});
 
@@ -59,6 +59,7 @@ void test_set() {
 		std::cout << (iter == back_to_runtime.begin() ? "" : ", ") << *iter;
 	}
 	std::cout << "\n\n";
+	
 }
 
 
@@ -94,12 +95,56 @@ void test_map() {
 }
 
 
+// even nested arrays
+constexpr hybrid::array<hybrid::array<int>> multiplication_table(hybrid::array<int> xs, hybrid::array<int> ys) {
+	hybrid::array<hybrid::array<int>> result;
+	for (int x : xs) {
+		hybrid::array<int> row;
+		row.reserve(ys.size());
+		for (int y : ys) {
+			row.push_back(x * y);
+		}
+		result.push_back(row);
+	}
+	return result;
+}
+
+void test_nested() {
+	auto dynamic_result = multiplication_table({1, 2, 3, 4, 5, 6}, {2, 4, 5, 7, 8});
+
+	for (const auto& row : dynamic_result) {
+		for (int num : row) {
+			std::cout << num << ", ";
+		}
+		std::cout << "\n";
+	}
+	std::cout << "\n\n";
+
+	constexpr auto static_size = hybrid::compute_size(multiplication_table, std::vector<int>{1, 2, 3, 4, 5, 6}, std::vector<int>{2, 4, 5, 7, 8});
+	static_assert(static_size == 6);
+	std::cout << "size: " << static_size << "\n";
+
+	constexpr auto sizes = hybrid::max_inner_size(multiplication_table(hybrid::array{1, 2, 3, 4, 5, 6}, hybrid::array{2, 4, 5, 7, 8}));
+	std::cout << "max size: " << sizes << '\n';
+
+	auto test = hybrid::cast(dynamic_result);
+
+	constexpr auto inner_size = [ptr = 42]() consteval {
+		auto result_once = multiplication_table({1, 2, 3, 4, 5, 6}, {2, 4, 5, 7, 8});
+
+		auto dimensions = ([]<typename T>() consteval { return 6; }).operator()<int>();
+
+		return 5;
+	}();
+	static_assert(inner_size == 5);
+}
+
 int main() {
 
 	test_array();
 	test_set();
 	test_map();
-
+	test_nested();
 
 	return 0;
 }

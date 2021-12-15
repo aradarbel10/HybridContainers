@@ -57,6 +57,17 @@ namespace hybrid {
 				else
 					return iter->second;
 			}
+
+			constexpr const ValT& operator[](const KeyT& key) const {
+				std::pair<KeyT, ValT> pair;
+				pair.first = key;
+				auto iter = parent::find(pair);
+
+				if (iter == end())
+					throw std::out_of_range{"key not found"};
+				else
+					return iter->second;
+			}
 		};
 	} // namespace impl
 

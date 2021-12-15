@@ -11,7 +11,7 @@
 
 // put it all together
 #define hybrid_compute(func, ...)                                                                                                                              \
-	hybrid::compute_val < []() consteval { return hybrid::compute_size(&func, __VA_ARGS__); }                                                                  \
+	hybrid::compute_val < [&]() consteval { return hybrid::compute_size(&func, __VA_ARGS__); }                                                                 \
 	() > (&func, __VA_ARGS__)
 
 namespace hybrid {
@@ -19,6 +19,12 @@ namespace hybrid {
 	template <size_t TargetSize = 0, size_t N, typename T, template <typename, size_t> class C>
 	constexpr auto cast(const C<T, N>& container) {
 		return static_cast<C<T, TargetSize>>(container);
+	}
+
+	template <size_t TargetSize1 = 0, size_t TargetSize2, typename T, size_t N1, size_t N2, template <typename, size_t> class C1, template <typename, size_t> class C2>
+	constexpr auto cast(const C1<C2<T, N2>, N1>& container) {
+		C1<C2<T, TargetSize2>, TargetSize1> result;
+		return hybrid::array<int, 7>{1, 2, 3, 4, 5, 6, 7};
 	}
 
 	template <size_t TargetSize = 0, size_t N, typename T, typename S, template <typename, typename, size_t> class C>
@@ -29,7 +35,7 @@ namespace hybrid {
 	// get size of result at compile-time
 	template <typename F, typename... Args>
 	requires std::invocable<F, Args...>
-	consteval size_t compute_size(F func, Args... args) {
+	constexpr size_t compute_size(F func, Args... args) {
 		auto result = func(args...);
 		return result.size();
 	}
@@ -44,17 +50,12 @@ namespace hybrid {
 
 	// handle nested containers
 	template <typename T, size_t N1, size_t N2, template <typename, size_t> class C1, template <typename, size_t> class C2>
-	constexpr auto get_nested_sizes(C1<C2<T, N2>, N1> container) {
-		std::vector<size_t> result;
+	constexpr auto max_inner_size(const C1<C2<T, N2>, N1>& container) {
+		size_t result = 0;
 		for (const auto& inner : container) {
-			result.push_back(inner.size());
+			result = std::max(result, inner.size());
 		}
 		return result;
-	}
-
-	template <typename T, template <typename, size_t> class C1, template <typename, size_t> class C2>
-	constexpr auto to_static(C1<C2<T, 0>, 0> container) {
-		auto x = hybrid_compute(get_nested_sizes, container);
 	}
 
 } // namespace hybrid
