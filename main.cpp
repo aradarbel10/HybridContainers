@@ -139,12 +139,24 @@ void test_nested() {
 	static_assert(inner_size == 5);
 }
 
+void test_iter_pair() {
+	std::vector<int> vec{10, 20, 30, 40};
+	hybrid::array<int, 6> arr{vec.begin() + 1, vec.end()};
+	arr.push_back(50);
+
+	std::cout << "\n\ntest:\n";
+	for (int i : arr) {
+		std::cout << i << ", ";
+	}
+}
+
 int main() {
 
 	test_array();
 	test_set();
 	test_map();
 	test_nested();
+	test_iter_pair();
 
 	return 0;
 }

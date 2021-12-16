@@ -16,6 +16,9 @@ namespace hybrid {
 		using parent::at;
 
 	public:
+
+		using value_type = parent::value_type;
+
 		constexpr array() = default;
 
 		template <size_t S, template <typename, size_t> class C>
@@ -31,6 +34,14 @@ namespace hybrid {
 				throw std::invalid_argument{"statically allocated array can't hold more than its capacity!"};
 			std::copy(il.begin(), il.end(), this->begin());
 			m_size = il.size();
+		}
+
+		constexpr array(std::input_iterator auto first, std::input_iterator auto last) {
+			m_size = std::distance(first, last);
+			if (m_size > N)
+				throw std::invalid_argument{"statically allocated array can't hold more than its capacity!"};
+			
+			std::copy(first, last, this->begin());
 		}
 
 		constexpr T& operator[](size_t index) {
@@ -87,6 +98,8 @@ namespace hybrid {
 	template <typename T>
 	class array<T, 0> : public std::vector<T> {
 	public:
+		using value_type = std::vector<T>::value_type;
+
 		constexpr array() = default;
 
 		constexpr array(std::initializer_list<T> il) : std::vector<T>(il) {}
@@ -98,6 +111,8 @@ namespace hybrid {
 		}
 
 		constexpr array(std::vector<T> other) : std::vector<T>(other) {}
+
+		constexpr array(std::input_iterator auto first, std::input_iterator auto last) : std::vector<T>(first, last) {}
 	};
 
 	template <typename T>
