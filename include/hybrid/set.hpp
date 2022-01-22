@@ -23,7 +23,7 @@ namespace hybrid {
 				}
 			}
 
-			constexpr int binary_search(const ValT& val) { return binary_search(val, 0, size()); }
+			constexpr int binary_search(const ValT& val) const { return binary_search(val, 0, size()); }
 
 			constexpr static bool vals_eq(const ValT& lhs, const ValT& rhs) { return !Ord{}(lhs, rhs) && !Ord{}(rhs, lhs); }
 
@@ -37,7 +37,7 @@ namespace hybrid {
 			}
 
 			template <size_t S, template <typename, size_t> class C>
-			constexpr impl_set(const C<ValT, S>& other) {
+			constexpr impl_set(const C<ValT, S>& other) : hybrid::array<ValT, N>() {
 				auto i = other.begin();
 				while (i != other.end()) {
 					insert(*i);
@@ -79,6 +79,9 @@ namespace hybrid {
 				int index = binary_search(val);
 				return ((index < size() && vals_eq(val, at(index))) ? begin() + index : end());
 			}
+
+			template <typename KeyT, typename ValT, size_t N = 0>
+			friend class impl_map;
 		};
 	} // namespace impl
 

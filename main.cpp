@@ -1,4 +1,4 @@
-#include "hybrid/hybrid.hpp"
+#include "include/hybrid/array.hpp"
 #include <iostream>
 #include <vector>
 
@@ -29,6 +29,8 @@ void test_array() {
 	}
 	std::cout << "\n\n";
 }
+
+/*
 
 // another algorithm, this time it uses `set`
 constexpr hybrid::set<int> factors(int num) {
@@ -139,24 +141,44 @@ void test_nested() {
 	static_assert(inner_size == 5);
 }
 
-void test_iter_pair() {
-	std::vector<int> vec{10, 20, 30, 40};
-	hybrid::array<int, 6> arr{vec.begin() + 1, vec.end()};
-	arr.push_back(50);
+constexpr hybrid::set<std::pair<char, int>> count_characters(std::string_view str) {
+	hybrid::set<std::pair<char, int>> result;
 
-	std::cout << "\n\ntest:\n";
-	for (int i : arr) {
-		std::cout << i << ", ";
+
+	for (int i = 0; i < str.size(); i++) {
+		result.insert({str[i], 0});
 	}
+
+	//std::for_each(str.begin(), str.end(), [&](const char c) { result.insert({ c, 0 }); });
+
+	return result;
 }
+
+void test_count_characters() {
+	//auto dynamic_result = count_characters("to be or not to be");
+
+	//constexpr auto counts = hybrid::compute_size(count_characters, hybrid::array<char>{'a', 'b', 'c', 'd'});
+	//static_assert(counts == 4);
+
+	constexpr auto counts = hybrid::compute_size(count_characters, std::string_view{"abcdefghijklmnopqrst uvwxyz"});
+	std::cout << "plz size " << counts << '\n';
+	//static_assert(counts[' '] == 5);
+
+	//std::cout << "\n\ncounts:\n";
+	//for (const auto& [c, i] : counts) {
+	//	std::cout << "(" << c << ", " << i << ")\n";
+	//}
+}
+
+*/
 
 int main() {
 
 	test_array();
-	test_set();
-	test_map();
-	test_nested();
-	test_iter_pair();
+	//test_set();
+	//test_map();
+	//test_nested();
+	//test_count_characters();
 
 	return 0;
 }

@@ -3,9 +3,113 @@
 #include <algorithm>
 #include <array>
 #include <stdexcept>
-#include <vector>
 
 namespace hybrid {
+	template<typename T>
+	class vector {
+	private:
+		T* m_data = nullptr;
+		size_t m_size = 0;
+		size_t m_cap = 0;
+
+	public:
+		constexpr vector() = default;
+
+		constexpr friend void swap(vector<T>& lhs, vector<T>& rhs) {
+			std::swap(lhs.m_data, rhs.m_data);
+			std::swap(lhs.m_cap, rhs.m_cap);
+			std::swap(lhs.m_data, rhs.m_data);
+		}
+
+		constexpr vector(const vector<T>& other) {
+			m_size = other.m_size;
+			m_cap = other.m_cap;
+
+			if (other.m_data) {
+				m_data = new T[m_cap]();
+				std::memcpy(m_data, other.m_data, m_size);
+			}
+		}
+
+		constexpr vector(vector<T>&& other) {
+			swap(*this, other);
+		}
+
+		constexpr vector<T>& operator=(const vector<T>& other) {
+			vector<T> temp(other);
+			swap(*this, temp);
+			return *this;
+		}
+
+		constexpr vector<T>& operator=(vector<T>&& other) {
+			delete[] m_data;
+			swap(*this, other);
+		}
+
+		constexpr ~vector() {
+			delete[] m_data;
+		}
+
+		constexpr T& at(size_t index) {
+			if (index >= m_size) throw std::out_of_range{ "vector index out of range!" };
+			return m_data[index];
+		}
+
+		constexpr const T& at(size_t index) const {
+			if (index >= m_size) throw std::out_of_range{ "vector index out of range!" };
+			return m_data[index];
+		}
+
+		constexpr T& operator[](size_t index) { return at(index); }
+		constexpr const T& operator[](size_t index) const { return at(index); }
+
+		constexpr T& front() { return at(0); }
+		constexpr const T& front() const { return at(0); }
+		constexpr T& back() { return at(m_size - 1); }
+		constexpr const T& back() const { return at(m_size - 1); }
+
+		constexpr T* data() { return m_data; }
+		constexpr const T* data() const { return m_data; }
+
+		constexpr T* begin() { return m_data; }
+		constexpr const T* begin() const { return m_data; }
+		constexpr T* end() { return m_data + m_size * sizeof(T); }
+		constexpr const T* end() const { return m_data + m_size * sizeof(T); }
+
+		constexpr bool empty() { return m_size == 0; }
+		constexpr size_t size() { return m_size; }
+		constexpr size_t capacity() { return m_cap; }
+
+		constexpr void reserve(size_t count) {
+			if (count > m_cap) {
+				T* old = m_data;
+
+				m_data = new T[count]();
+				std::memcpy(m_data, old, m_size);
+
+				delete[] old;
+			}
+		}
+
+		constexpr void clear() {
+			if (m_data) delete[] m_data;
+			m_size = 0;
+			m_cap = 0;
+		}
+
+		constexpr void push_back(const T& elem) {
+			if (m_size < m_cap) {
+				*(m_data + m_size) = elem;
+				++m_size;
+			} else {
+				
+			}
+		}
+
+	};
+
+
+
 	template <typename T, size_t N = 0>
 	class array : private std::array<T, N> {
 	private:
@@ -87,6 +191,9 @@ namespace hybrid {
 			if (new_size > N)
 				throw std::invalid_argument{"can't resize statically allocated array to more than its capacity!"};
 			m_size = new_size;
+		}
+		constexpr parent::iterator erase(parent::iterator iter) {
+
 		}
 	};
 
